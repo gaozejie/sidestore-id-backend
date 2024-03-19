@@ -26,6 +26,9 @@ pub fn config_services(cfg: &mut web::ServiceConfig) {
                         web::resource("/me").route(web::get().to(auth_controller::me)),
                     )
                     .service(
+                        web::resource("/change-password").route(web::post().to(auth_controller::change_user_password)),
+                    )
+                    .service(
                         web::scope("/oauth2")
                             .service(
                                 web::resource("/authorize")

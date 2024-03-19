@@ -1,7 +1,7 @@
 use crate::auth::{create_auth_tokens, JwtTokenScope};
 use crate::config::Config;
-use crate::db::Pool;
 use crate::db::models::user::{User, UserDTO};
+use crate::db::Pool;
 use crate::errors::ServiceError;
 
 pub type UserAndTokens = (User, String, String);
@@ -12,6 +12,8 @@ pub fn signup(user_dto: UserDTO, pool: &Pool, config: &Config) -> Result<UserAnd
     if User::find_by_email(&user_dto.email, conn).is_ok() {
         return Err(ServiceError::BadRequest { error_message: "Email already exists".to_string() })
     }
+
+    // TODO: Validate password
 
     let password_hash = bcrypt::hash(user_dto.password, bcrypt::DEFAULT_COST).unwrap();
     let user = User::new(&user_dto.email, &password_hash);
@@ -74,4 +76,28 @@ pub fn user_details(pool: &Pool, user_id: uuid::Uuid) -> Result<User, ServiceErr
         Ok(user) => Ok(user),
         Err(_) => Err(ServiceError::Unauthorized { error_message: "User not found".to_string() })
     }
+}
+
+pub fn change_user_password(pool: &Pool, user_id: uuid::Uuid, current_password: String, new_password: String) -> Result<(), ServiceError> {
+    let conn = &mut pool.get().unwrap();
+
+    let mut user = match User::find_by_id(&user_id, conn) {
+        Ok(user) => user,
+        Err(_) => return Err(ServiceError::Unauthorized { error_message: "User not found".to_string() })
+    };
+
+    // Check current password
+    if bcrypt::verify(&current_password, &user.password_hash).unwrap_or(false) != true {
+        return Err(ServiceError::BadRequest { error_message: "Current password couldn't be verified".to_string() })
+    }
+
+    // TODO: Validate new password
+
+    // Hash the new password and update the user
+    let password_hash = bcrypt::hash(new_password, bcrypt::DEFAULT_COST).unwrap();
+    user.password_hash = password_hash;
+    user.update(conn)
+        .map_err(|_| ServiceError::InternalServerError { error_message: "Failed to update the password".to_string() })?;
+
+    Ok(())
 }

@@ -1,11 +1,11 @@
+use serde::{Deserialize, Serialize};
+use utoipa::ToResponse;
+
 pub mod auth;
 pub mod app_reviews;
 pub mod oauth2;
 
-use serde::{Deserialize, Serialize};
-
-
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, ToResponse)]
 pub struct MessageResponse {
     pub message: String,
 }

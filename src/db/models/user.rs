@@ -1,13 +1,12 @@
-use log::error;
-use chrono::{Utc, NaiveDateTime};
-use serde::{Deserialize, Serialize};
+use chrono::{NaiveDateTime, Utc};
 use diesel::prelude::*;
 use diesel::result::Error;
+use log::error;
+use serde::{Deserialize, Serialize};
 use utoipa::ToResponse;
 
 use crate::db::Connection;
 use crate::db::schema::users;
-
 
 #[derive(Serialize, Deserialize, Debug, Clone, Queryable, Identifiable, Insertable, AsChangeset, ToResponse)]
 #[diesel(table_name = users)]
@@ -72,7 +71,7 @@ impl User {
             .get_result::<User>(conn)
     }
 
-    pub async fn update(&mut self, conn: &mut Connection) -> Result<Self, Error> {
+    pub fn update(&mut self, conn: &mut Connection) -> Result<Self, Error> {
         self.updated_at = Utc::now().naive_utc();
 
         match diesel::update(users::dsl::users).set(self.clone()).get_result::<User>(conn) {
@@ -84,7 +83,7 @@ impl User {
         }
     }
 
-    pub async fn delete(&mut self, conn: &mut Connection) -> Result<(), Error> {
+    pub fn delete(&mut self, conn: &mut Connection) -> Result<(), Error> {
         match diesel::delete(users::dsl::users.find(self.id.clone())).execute(conn) {
             Ok(_) => Ok(()),
             Err(e) => {

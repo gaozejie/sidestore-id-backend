@@ -10,7 +10,7 @@ use crate::db::models::user::User;
 use crate::middlewares::auth::JwtMiddleware;
 use crate::services::auth_service;
 
-use super::models::auth::{LoginRequest, LoginResponse, SignupRequest, SignupResponse};
+use super::models::auth::{LoginRequest, LoginResponse, PasswordChangeRequest, SignupRequest, SignupResponse};
 use super::models::MessageResponse;
 
 /// Registration endpoint for new users
@@ -121,6 +121,23 @@ pub async fn me(data: web::Data<AppState>, jwt: JwtMiddleware) -> Result<HttpRes
     let user = auth_service::user_details(&data.db, jwt.user_id)?;
     Ok(HttpResponse::Ok().json(user))
 }
+
+
+/// Change user password
+#[utoipa::path(
+post,
+path = "/api/auth/change-password",
+responses(
+(status = 200, response = MessageResponse)
+)
+)]
+pub async fn change_user_password(body: web::Json<PasswordChangeRequest>, data: web::Data<AppState>, jwt: JwtMiddleware) -> Result<HttpResponse, ServiceError> {
+    enforce_scope(&jwt, JwtTokenScope::Full)?;
+
+    auth_service::change_user_password(&data.db, jwt.user_id, body.current_password.clone(), body.new_password.clone())?;
+    Ok(HttpResponse::Ok().json(MessageResponse { message: "The password has been updated successfully".to_string() }))
+}
+
 
 fn get_auth_cookies<'a>(access_token: &'a str, refresh_token: &'a str) -> (Cookie<'a>, Cookie<'a>) {
     let access_token_cookie = Cookie::build("access_token", access_token)

@@ -5,6 +5,7 @@ use crate::api::ping_controller as Health;
 use crate::api::models::auth as AuthModels;
 use crate::api::models::app_reviews as AppReviewModels;
 use crate::db::models as DBModels;
+use crate::api::models::MessageResponse;
 use crate::errors::ErrorResponse;
 
 #[derive(OpenApi)]
@@ -17,6 +18,8 @@ use crate::errors::ErrorResponse;
         Authentication::logout,
         Authentication::me,
 
+        Authentication::change_user_password,
+
         AppReviews::get_public_key,
         AppReviews::sign,
         AppReviews::get,
@@ -28,6 +31,7 @@ use crate::errors::ErrorResponse;
         schemas(
             AuthModels::LoginRequest,
             AuthModels::SignupRequest,
+            AuthModels::PasswordChangeRequest,
 
             AppReviewModels::AppReviewSignatureRequest,
             AppReviewModels::AppReviewDeletionRequest,
@@ -35,6 +39,7 @@ use crate::errors::ErrorResponse;
             AppReviewModels::AppReviewStatus,
         ),
         responses(
+            MessageResponse,
             ErrorResponse,
 
             AuthModels::LoginResponse,
