@@ -13,8 +13,6 @@ pub fn signup(user_dto: UserDTO, pool: &Pool, config: &Config) -> Result<UserAnd
         return Err(ServiceError::BadRequest { error_message: "Email already exists".to_string() })
     }
 
-    // TODO: Validate password
-
     let password_hash = bcrypt::hash(user_dto.password, bcrypt::DEFAULT_COST).unwrap();
     let user = User::new(&user_dto.email, &password_hash);
     
@@ -90,8 +88,6 @@ pub fn change_user_password(pool: &Pool, user_id: uuid::Uuid, current_password: 
     if bcrypt::verify(&current_password, &user.password_hash).unwrap_or(false) != true {
         return Err(ServiceError::BadRequest { error_message: "Current password couldn't be verified".to_string() })
     }
-
-    // TODO: Validate new password
 
     // Hash the new password and update the user
     let password_hash = bcrypt::hash(new_password, bcrypt::DEFAULT_COST).unwrap();

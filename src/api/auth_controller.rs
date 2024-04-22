@@ -1,6 +1,7 @@
 use actix_web::{HttpResponse, Responder, web};
 use actix_web::cookie::{Cookie, SameSite};
 use time::OffsetDateTime;
+use validator::Validate;
 
 use crate::{db::models::user::UserDTO, errors::ServiceError};
 use crate::api::utils::enforce_scope;
@@ -22,6 +23,9 @@ use super::models::MessageResponse;
     ),
 )]
 pub async fn signup(body: web::Json<SignupRequest>, data: web::Data<AppState>) -> Result<HttpResponse, ServiceError> {
+    body.validate()
+        .map_err(|e| ServiceError::ValidationError { field: e.to_string() })?;
+
     let user_dto = UserDTO { email: body.email.clone(), password: body.password.clone(), username: None };
     let (user, access_token, refresh_token) = auth_service::login(user_dto, &data.db, &data.env)?;
     let (access_token_cookie, refresh_token_cookie) = get_auth_cookies(&access_token, &refresh_token);
@@ -114,6 +118,9 @@ pub async fn logout() -> impl Responder {
     responses(
         (status = 200, response = User),
     ),
+    security(
+        ("oauth" = [])
+    )
 )]
 pub async fn me(data: web::Data<AppState>, jwt: JwtMiddleware) -> Result<HttpResponse, ServiceError> {
     enforce_scope(&jwt, JwtTokenScope::Profile)?;
@@ -125,14 +132,20 @@ pub async fn me(data: web::Data<AppState>, jwt: JwtMiddleware) -> Result<HttpRes
 
 /// Change user password
 #[utoipa::path(
-post,
-path = "/api/auth/change-password",
-responses(
-(status = 200, response = MessageResponse)
-)
+    post,
+    path = "/api/auth/change-password",
+    responses(
+        (status = 200, response = MessageResponse)
+    ),
+    security(
+        ("oauth" = [])
+    )
 )]
 pub async fn change_user_password(body: web::Json<PasswordChangeRequest>, data: web::Data<AppState>, jwt: JwtMiddleware) -> Result<HttpResponse, ServiceError> {
     enforce_scope(&jwt, JwtTokenScope::Full)?;
+
+    body.validate()
+        .map_err(|e| ServiceError::ValidationError { field: e.to_string() })?;
 
     auth_service::change_user_password(&data.db, jwt.user_id, body.current_password.clone(), body.new_password.clone())?;
     Ok(HttpResponse::Ok().json(MessageResponse { message: "The password has been updated successfully".to_string() }))
