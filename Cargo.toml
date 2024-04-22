@@ -1,5 +1,6 @@
 [package]
 name = "sidestore-id-backend"
+description = "Backend service for SideStore ID, the one account for all things sideloading."
 version = "0.1.0"
 edition = "2021"
 
@@ -60,6 +61,9 @@ url = "2.5"
 utoipa = { version = "4", features = ["actix_extras", "uuid", "chrono"] }
 utoipa-swagger-ui = { version = "5", features = ["actix-web"] }
 toml = "0.8.10"
+regex = "1.10.4"
+lazy_static = "1.4.0"
+validator = { version = "0.18.1", features = ["derive"] }
 
 
 [dev-dependencies]
