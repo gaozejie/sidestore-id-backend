@@ -59,7 +59,7 @@ url = "2.5"
 
 # OpenAPI spec
 utoipa = { version = "4", features = ["actix_extras", "uuid", "chrono"] }
-utoipa-swagger-ui = { version = "5", features = ["actix-web"] }
+utoipa-swagger-ui = { version = "6.0.0", features = ["actix-web"] }
 toml = "0.8.10"
 regex = "1.10.4"
 lazy_static = "1.4.0"
