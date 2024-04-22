@@ -2,12 +2,12 @@
 pub mod review_signing {
     use base64::{Engine as _, engine::general_purpose::STANDARD as base64_engine};
     use ed25519_dalek::{Signer, SigningKey};
+    use ed25519_dalek::pkcs8::{DecodePrivateKey, EncodePrivateKey, EncodePublicKey};
     use ed25519_dalek::pkcs8::spki::der::pem::LineEnding;
-    use ed25519_dalek::pkcs8::{EncodePrivateKey, EncodePublicKey, DecodePrivateKey};
-    use log::{info, debug};
+    use log::{debug, info};
     use serde_json;
 
-    use crate::{config::Config, constants, errors::ServiceError, api::models::app_reviews::AppReviewSignatureData};
+    use crate::{api::models::app_reviews::AppReviewSignatureData, config::Config, constants, errors::ServiceError};
 
     pub fn create_or_load_review_signing_key(config: &Config) -> Result<SigningKey, String> {
         let storage_path = std::path::Path::new(&config.storage_path);
@@ -86,6 +86,7 @@ pub mod review_signing {
     #[cfg(test)]
     mod tests {
         use crate::api::models::app_reviews::AppReviewStatus;
+
         use super::*;
 
         #[test]
@@ -104,8 +105,10 @@ pub mod review_signing {
                 jwt_expiration: 3600,
                 jwt_refresh_expiration: 86400,
                 cors_origin: "*".to_string(),
+                public_url: "http://localhost".to_string(),
                 database_url: "sqlite://test.db".to_string(),
                 storage_path: "./test-storage".to_string(),
+                oauth_config_path: "".to_string(),
             };
             let signing_key = create_or_load_review_signing_key(&config).unwrap();
             let review_data = AppReviewSignatureData {

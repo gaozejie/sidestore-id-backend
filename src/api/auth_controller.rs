@@ -24,7 +24,7 @@ use super::models::MessageResponse;
 )]
 pub async fn signup(body: web::Json<SignupRequest>, data: web::Data<AppState>) -> Result<HttpResponse, ServiceError> {
     body.validate()
-        .map_err(|e| ServiceError::ValidationError { field: e.to_string() })?;
+        .map_err(|e| ServiceError::from(e))?;
 
     let user_dto = UserDTO { email: body.email.clone(), password: body.password.clone(), username: None };
     let (user, access_token, refresh_token) = auth_service::login(user_dto, &data.db, &data.env)?;
@@ -145,7 +145,7 @@ pub async fn change_user_password(body: web::Json<PasswordChangeRequest>, data: 
     enforce_scope(&jwt, JwtTokenScope::Full)?;
 
     body.validate()
-        .map_err(|e| ServiceError::ValidationError { field: e.to_string() })?;
+        .map_err(|e| ServiceError::from(e))?;
 
     auth_service::change_user_password(&data.db, jwt.user_id, body.current_password.clone(), body.new_password.clone())?;
     Ok(HttpResponse::Ok().json(MessageResponse { message: "The password has been updated successfully".to_string() }))

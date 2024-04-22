@@ -41,6 +41,12 @@ pub fn config_services(cfg: &mut web::ServiceConfig) {
                     ),
             )
             .service(
+                web::scope("/account")
+                    .service(
+                        web::resource("/username").route(web::put().to(account_controller::update_username)),
+                    ),
+            )
+            .service(
                 web::scope("/reviews")
                     .service(
                         web::resource("/public_key").route(web::get().to(app_review_controller::get_public_key)),

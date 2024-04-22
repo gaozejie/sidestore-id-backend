@@ -8,7 +8,7 @@ use crate::db::models::user::User;
 
 lazy_static! {
      static ref RE_SPECIAL_CHAR: Regex = Regex::new("^.*?[@$!%*?&].*$").unwrap();
- }
+}
 
 fn validate_password(password: &str) -> Result<(), ValidationError> {
     let mut has_whitespace = false;

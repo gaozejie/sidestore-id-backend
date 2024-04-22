@@ -6,3 +6,4 @@ pub mod models;
 pub mod oauth2;
 pub mod doc;
 pub mod utils;
+pub mod account_controller;

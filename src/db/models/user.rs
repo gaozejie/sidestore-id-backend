@@ -3,12 +3,12 @@ use diesel::prelude::*;
 use diesel::result::Error;
 use log::error;
 use serde::{Deserialize, Serialize};
-use utoipa::ToResponse;
+use utoipa::{ToResponse, ToSchema};
 
 use crate::db::Connection;
 use crate::db::schema::users;
 
-#[derive(Serialize, Deserialize, Debug, Clone, Queryable, Identifiable, Insertable, AsChangeset, ToResponse)]
+#[derive(Serialize, Deserialize, Debug, Clone, Queryable, Identifiable, Insertable, AsChangeset, ToResponse, ToSchema)]
 #[diesel(table_name = users)]
 #[serde(rename_all = "camelCase")]
 pub struct User {
